@@ -1,0 +1,49 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="it.maggioli.eldasoft.tabellati.dao.TabellatiMapper">
+
+    <resultMap id="listaregioniMap" type="tabellatoentry">
+    	<result column="codice" property="codice" />
+        <result column="descrizione" property="descrizione" />
+    </resultMap>   
+
+	<resultMap id="listaprovinceMap" type="tabellatoentry">
+    	<result column="codice" property="codice" />
+        <result column="descrizione" property="descrizione" />
+    </resultMap> 
+    
+    <resultMap id="listaprovinceIstatMap" type="tabellatoprovinceentry">
+    	<result column="codice" property="codice" />
+        <result column="descrizione" property="descrizione" />
+        <result column="codistat" property="codistat" />
+    </resultMap> 
+        
+    
+	<select id="getRegioni" resultMap="listaregioniMap">
+		select substring(TABCOD2, 2, 2) codice, TABDESC descrizione from TABSCHE where TABCOD='S2003' AND TABCOD1 = '05' order by TABDESC asc
+	</select>
+
+	<select id="getProvince" resultMap="listaprovinceMap" parameterType="string">
+  SELECT t1.tabcod3 AS codice,
+    t1.tabdesc AS descrizione
+   FROM tabsche t1,
+    ( SELECT DISTINCT substring(tabsche.tabcod3, 1, 6) AS codistat
+           FROM tabsche
+          WHERE tabsche.tabcod = 'S2003' AND tabsche.tabcod1 = '09') t2
+  WHERE t1.tabcod = 'S2003' AND t1.tabcod1 = '07' AND ('0' + substring(t2.codistat, 4, 3)) = t1.tabcod2
+  and t2.codistat like #{istat} + '%' order by descrizione
+	</select>
+	
+	
+	<select id="getProvinceIstat" resultMap="listaprovinceIstatMap">
+		SELECT substring(t2.codistat, 2, 2) as codistat,
+	t1.tabcod3 AS codice,
+    t1.tabdesc AS descrizione
+   FROM tabsche t1,
+    ( SELECT DISTINCT substring(tabsche.tabcod3, 1, 6) AS codistat
+           FROM tabsche
+          WHERE tabsche.tabcod = 'S2003' AND tabsche.tabcod1 = '09') t2
+  WHERE t1.tabcod = 'S2003' AND t1.tabcod1 = '07' AND ('0' + substring(t2.codistat, 4, 3)) = t1.tabcod2
+   order by descrizione
+	</select>
+</mapper>
